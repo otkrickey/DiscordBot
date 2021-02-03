@@ -1,7 +1,9 @@
 import Discord from 'discord.js';
 const client = new Discord.Client();
 
-import { token, prefix } from 'config.json';
+require('dotenv').config();
+const token = process.env.TOKEN
+const prefix = process.env.PREFIX
 
 
 const command = (client: Discord.Client, aliases: string | string[], callback: (message: Discord.Message) => void): void => {
