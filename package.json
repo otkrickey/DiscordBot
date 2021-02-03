@@ -7,16 +7,17 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.14.22",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  },
   "scripts": {
     "start": "node index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/otkrickey/DiscordBot.git"
-  },
+  "repository": "git+https://github.com/otkrickey/DiscordBot.git",
   "keywords": [],
-  "author": "",
+  "author": "otkrickey <rtk.otk@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/otkrickey/DiscordBot/issues"
