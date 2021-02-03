@@ -106,3 +106,4 @@ dist
 # self added
 .clasp.json
 appsscript.json
+config.json
