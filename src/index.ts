@@ -31,21 +31,17 @@ const addReactions = (message: Discord.Message, reactions: string[]) => {
 }
 
 
-// const first_message = async (client: Discord.Client, id: string | number, text: string, reactions?: string[] = []) => {
-//     const _id = (typeof id === 'string') ? id : String(id);
-//     const channel = await client.channels.fetch('');
-//     channel.messages.fetch().then((messages) => {
-//         if (messages.size === 0) {
-//             channel.send(text).then(message => {
-//                 addReactions(message, reactions);
-//             });
-//         } else {
-
-//         }
-//     });
-// }
-
-
+const first_message = async (client: Discord.Client, id: string | number, text: string, reactions?: string[] = []) => {
+    const _id = (typeof id === 'string') ? id : String(id);
+    const channel = client.channels.cache.get(_id);
+    channel.messages.fetch().then((messages) => {
+        if (messages.size === 0) {
+            channel.send(text).then(message => {
+                addReactions(message, reactions);
+            });
+        } else { }
+    });
+}
 
 
 client.on('ready', function () {
