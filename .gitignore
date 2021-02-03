@@ -107,3 +107,5 @@ dist
 .clasp.json
 appsscript.json
 config.json
+
+*.ig.*
