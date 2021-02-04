@@ -8,6 +8,11 @@ const client = new discord_js_1.default.Client();
 require('dotenv').config();
 const token = process.env.TOKEN;
 const prefix = process.env.PREFIX;
+const node_emoji_1 = __importDefault(require("node-emoji"));
+const EMOJI = (text) => {
+    const _c = text ? node_emoji_1.default.find(text) : undefined;
+    return _c ? _c.emoji : undefined;
+};
 const command = (client, aliases, callback) => {
     const _aliases = (typeof aliases === 'string') ? [aliases] : aliases;
     client.on('message', function (message) {
@@ -22,14 +27,28 @@ const command = (client, aliases, callback) => {
     });
 };
 const addReactions = (message, reactions) => {
-    message.react(reactions[0]);
-    reactions.shift();
-    if (reactions.length > 0) {
-        setTimeout(() => addReactions(message, reactions), 750);
+    const reaction = EMOJI(reactions.shift());
+    if (reaction) {
+        message.react(reaction);
     }
+    if (reactions.length > 0) {
+        return addReactions(message, reactions);
+    }
+};
+const voting = async (client, id, text, reactions = []) => {
+    const _id = (typeof id === 'string') ? id : String(id);
+    const _channel = await client.channels.fetch(_id);
+    const channel = _channel;
+    channel.send(`[vote] "${text}"`).then(message => { addReactions(message, reactions); });
 };
 client.on('ready', function () {
     console.log('The Client is ready');
+    command(client, 'vote', function (message) {
+        const content = message.content.replace('!vote ', '');
+        const Emojis = ['o', 'x'];
+        message.delete();
+        voting(client, '805560753657479231', content, Emojis);
+    });
     command(client, ['ping', 'test'], function (message) {
         message.channel.send('Pong!');
     });
