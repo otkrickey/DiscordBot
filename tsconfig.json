@@ -4,7 +4,6 @@
   ],
   "include": [
     "index.d.ts",
-    "config.json",
     "src/index.ts"
   ],
   "compilerOptions": {

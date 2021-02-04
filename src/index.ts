@@ -5,7 +5,6 @@ require('dotenv').config();
 const token = process.env.TOKEN
 const prefix = process.env.PREFIX
 
-
 import emoji from 'node-emoji';
 
 const EMOJI = (text: string | undefined): string | undefined => {
@@ -27,7 +26,6 @@ const command = (client: Discord.Client, aliases: string | string[], callback: (
         });
     });
 }
-
 
 const AddReactions = (message: Discord.Message, reactions: string[]): void => {
     const reaction = EMOJI(reactions.shift());
