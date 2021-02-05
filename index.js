@@ -86,5 +86,17 @@ client.on('ready', function () {
             .setFooter('This is a footer');
         message.channel.send(embed);
     });
+    command(client, 'serverinfo', (message) => {
+        const { guild } = message;
+        if (guild) {
+            const { name, region, memberCount, owner } = guild;
+            const icon = guild?.iconURL();
+            const embed = new discord_js_1.default.MessageEmbed()
+                .setTitle(name)
+                .setThumbnail(icon)
+                .addFields({ name: 'Region', value: region, inline: true, }, { name: 'Members', value: memberCount, inline: true, }, { name: 'Owner', value: owner?.user.tag, });
+            message.channel.send(embed);
+        }
+    });
 });
 client.login(token);
