@@ -7,14 +7,10 @@ const prefix = process.env.PREFIX
 
 import emoji from 'node-emoji';
 
-const EMOJI = (text: string | undefined): string | undefined => {
-    const _c = text ? emoji.find(text) : undefined
-    return _c ? _c.emoji : undefined
-}
+function EMOJI(text: string | undefined): string | undefined { const _c = text ? emoji.find(text) : undefined; return _c ? _c.emoji : undefined; }
 
-const command = (client: Discord.Client, aliases: string | string[], callback: (message: Discord.Message) => void): void => {
+function command(client: Discord.Client, aliases: string | string[], callback: (message: Discord.Message) => void): void {
     const _aliases = (typeof aliases === 'string') ? [aliases] : aliases;
-
     client.on('message', function (message) {
         const { content } = message;
         _aliases.forEach(function (alias) {
@@ -27,7 +23,7 @@ const command = (client: Discord.Client, aliases: string | string[], callback: (
     });
 }
 
-const AddReactions = (message: Discord.Message, reactions: string[]): void => {
+function AddReactions(message: Discord.Message, reactions: string[]): void {
     const reaction = EMOJI(reactions.shift());
     if (reaction) { message.react(reaction); }
     if (reactions.length > 0) {
@@ -35,11 +31,20 @@ const AddReactions = (message: Discord.Message, reactions: string[]): void => {
     }
 }
 
-const StartVoting = async (client: Discord.Client, id: string | number, text: string, reactions: string[] = []) => {
+async function StartVoting(client: Discord.Client, id: string | number, text: string, reactions: string[] = []): Promise<void> {
     const _id = (typeof id === 'string') ? id : String(id);
     const _channel = await client.channels.fetch(_id);
     const channel = (_channel as Discord.TextChannel);
     channel.send(`[vote] "${text}"`).then(message => { AddReactions(message, reactions); });
+}
+
+
+function DirectMessage(client: Discord.Client, req: string, res: string): void {
+    client.on('message', function (message) {
+        if (message.content.toLowerCase() === req.toLowerCase()) {
+            message.author.send(res);
+        }
+    });
 }
 
 
@@ -75,6 +80,8 @@ client.on('ready', function () {
         const content = message.content.replace('!status', '');
         client.user?.setPresence({ activity: { name: content, type: 0 } });
     });
+
+    DirectMessage(client, 'ping', 'pong');
 });
 
 client.login(token);
