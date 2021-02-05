@@ -82,6 +82,26 @@ client.on('ready', function () {
     });
 
     DirectMessage(client, 'ping', 'pong');
+
+
+    command(client, 'embed', (message) => {
+        const logo = 'https://avatars.githubusercontent.com/u/43507417';
+
+        const embed = new Discord.MessageEmbed()
+            .setTitle('TITLE')
+            .setURL('https://github.com/otkrickey/TwitchClipEditor')
+            .setAuthor('otkrickey')
+            .setImage(logo)
+            .setThumbnail(logo)
+            .setColor('#00AAFF')
+            .addFields(
+                { name: 'FIeld 1', value: 'Hello world', inline: true, },
+                { name: 'Field 2', value: 'Hello world', inline: true, },
+                { name: 'Field 3', value: 'Hello world', inline: true, },
+            )
+            .setFooter('This is a footer')
+        message.channel.send(embed);
+    });
 });
 
 client.login(token);

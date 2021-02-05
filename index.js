@@ -9,11 +9,8 @@ require('dotenv').config();
 const token = process.env.TOKEN;
 const prefix = process.env.PREFIX;
 const node_emoji_1 = __importDefault(require("node-emoji"));
-const EMOJI = (text) => {
-    const _c = text ? node_emoji_1.default.find(text) : undefined;
-    return _c ? _c.emoji : undefined;
-};
-const command = (client, aliases, callback) => {
+function EMOJI(text) { const _c = text ? node_emoji_1.default.find(text) : undefined; return _c ? _c.emoji : undefined; }
+function command(client, aliases, callback) {
     const _aliases = (typeof aliases === 'string') ? [aliases] : aliases;
     client.on('message', function (message) {
         const { content } = message;
@@ -25,8 +22,8 @@ const command = (client, aliases, callback) => {
             }
         });
     });
-};
-const AddReactions = (message, reactions) => {
+}
+function AddReactions(message, reactions) {
     const reaction = EMOJI(reactions.shift());
     if (reaction) {
         message.react(reaction);
@@ -34,13 +31,20 @@ const AddReactions = (message, reactions) => {
     if (reactions.length > 0) {
         return AddReactions(message, reactions);
     }
-};
-const StartVoting = async (client, id, text, reactions = []) => {
+}
+async function StartVoting(client, id, text, reactions = []) {
     const _id = (typeof id === 'string') ? id : String(id);
     const _channel = await client.channels.fetch(_id);
     const channel = _channel;
     channel.send(`[vote] "${text}"`).then(message => { AddReactions(message, reactions); });
-};
+}
+function DirectMessage(client, req, res) {
+    client.on('message', function (message) {
+        if (message.content.toLowerCase() === req.toLowerCase()) {
+            message.author.send(res);
+        }
+    });
+}
 client.on('ready', function () {
     console.log('The Client is ready');
     command(client, 'vote', function (message) {
@@ -67,6 +71,20 @@ client.on('ready', function () {
     command(client, 'status', function (message) {
         const content = message.content.replace('!status', '');
         client.user?.setPresence({ activity: { name: content, type: 0 } });
+    });
+    DirectMessage(client, 'ping', 'pong');
+    command(client, 'embed', (message) => {
+        const logo = 'https://avatars.githubusercontent.com/u/43507417';
+        const embed = new discord_js_1.default.MessageEmbed()
+            .setTitle('TITLE')
+            .setURL('https://github.com/otkrickey/TwitchClipEditor')
+            .setAuthor('otkrickey')
+            .setImage(logo)
+            .setThumbnail(logo)
+            .setColor('#00AAFF')
+            .addFields({ name: 'FIeld 1', value: 'Hello world', inline: true, }, { name: 'Field 2', value: 'Hello world', inline: true, }, { name: 'Field 3', value: 'Hello world', inline: true, })
+            .setFooter('This is a footer');
+        message.channel.send(embed);
     });
 });
 client.login(token);
