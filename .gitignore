@@ -109,3 +109,4 @@ appsscript.json
 config.json
 
 *.ig.*
+.vscode/
