@@ -9,15 +9,14 @@ function message(client: Discord.Client, aliases: string | string[], callback: (
     client.on('message', function (message) {
         if (message.content.startsWith(`${prefix}`)) {
             message.content = message.content.replace(`${prefix}`, '');
-            command(message, aliases, callback);
+            command(message, (typeof aliases === 'string') ? [aliases] : aliases, callback);
         }
     });
 }
 
-function command(message: Discord.Message, aliases: string | string[], callback: (message: Discord.Message) => void): void {
+function command(message: Discord.Message, aliases: string[], callback: (message: Discord.Message) => void): void {
     const { content } = message;
-    content.replace(`${prefix}`, '');
-    for (const alias of (typeof aliases === 'string') ? [aliases] : aliases) {
+    for (const alias of aliases) {
         if (content.startsWith(`${alias} `) || content === alias) {
             console.log(`Running ${alias}`);
             callback(message);

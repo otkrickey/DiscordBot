@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "dev:watch": "ts-node-dev src/index.ts"
+    "dev:idea": "ts-node src/idea.ts",
+    "dev:watch": "ts-node-dev src/index.ts",
+    "dev:watch:idea": "ts-node-dev src/idea.ts"
   },
   "keywords": [],
   "author": "",
