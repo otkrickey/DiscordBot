@@ -78,6 +78,21 @@ client.on('ready', async function () {
             .setFooter('This is a footer');
         message.channel.send(embed);
     });
+
+    command(client, 'serverinfo', function (message) {
+        const { guild } = message;
+        const { name, region, memberCount, owner } = guild as Discord.Guild;
+        const icon = guild?.iconURL();
+        const embed = new Discord.MessageEmbed()
+            .setTitle(name)
+            .setThumbnail(icon as string)
+            .addFields(
+                { name: 'Region', value: region, inline: true, },
+                { name: 'Members', value: memberCount, inline: true, },
+                { name: 'Owner', value: owner?.user.tag, }
+            );
+        message.channel.send(embed);
+    })
 });
 
 client.login(process.env.TOKEN);
