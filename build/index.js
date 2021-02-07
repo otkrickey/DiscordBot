@@ -3,78 +3,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const discord_js_1 = __importDefault(require("discord.js"));
-const client = new discord_js_1.default.Client();
+const Discord = require("discord.js");
 require('dotenv').config();
-const token = process.env.TOKEN;
-const prefix = process.env.PREFIX;
-const channel = process.env.CHANNEL;
-const node_emoji_1 = __importDefault(require("node-emoji"));
-function EMOJI(text) { const _c = text ? node_emoji_1.default.find(text) : undefined; return _c ? _c.emoji : undefined; }
-function Command(client, aliases, callback) {
-    client.on('message', function (message) {
-        const { content } = message;
-        for (const alias of (typeof aliases === 'string') ? [aliases] : aliases) {
-            const command = `${prefix}${alias}`;
-            if (content.startsWith(`${command} `) || content === command) {
-                console.log(`Running ${command}`);
-                callback(message);
-            }
-        }
-    });
-}
-function AddReactions(message, reactions) {
-    const reaction = EMOJI(reactions.shift());
-    if (reaction) {
-        message.react(reaction);
-    }
-    if (reactions.length > 0) {
-        return AddReactions(message, reactions);
-    }
-}
-async function StartVoting(client, id, text, reactions = []) {
-    if (id) {
-        const _channel = await client.channels.fetch(id);
-        const channel = _channel;
-        channel.send(`[vote] "${text}"`).then(message => { AddReactions(message, reactions); });
-    }
-}
-function DirectMessage(client, req, res) {
-    client.on('message', function (message) {
-        if (message.channel.type === 'dm' && message.content.toLowerCase() === req.toLowerCase()) {
-            message.author.send(res);
-        }
-    });
-}
-client.on('ready', function () {
-    console.log('The Client is ready');
-    Command(client, 'vote', function (message) {
-        const content = message.content.replace('!vote ', '');
-        const Emojis = ['o', 'x'];
-        message.delete();
-        StartVoting(client, channel, content, Emojis);
-    });
-    Command(client, ['ping'], function (message) {
+const client = new Discord.Client();
+const command_1 = __importDefault(require("./command"));
+const private_message_1 = __importDefault(require("./private-message"));
+client.on('ready', async function () {
+    console.log('The client is ready!');
+    // '!ping' | '!test' => 'Pong!'
+    command_1.default(client, ['ping', 'test'], (message) => {
         message.channel.send('Pong!');
     });
-    Command(client, ['cc', 'clearChannel'], function (message) {
+    // '!servers' => Count of Server Members
+    command_1.default(client, 'servers', (message) => {
+        client.guilds.cache.forEach((guild) => {
+            message.channel.send(`${guild.name} has a total of ${guild.memberCount} members`);
+        });
+    });
+    // '!cc' | 'clearchannel' => Clear All messages from channel
+    command_1.default(client, ['cc', 'clearchannel'], (message) => {
         if (message.member?.hasPermission('ADMINISTRATOR')) {
             message.channel.messages.fetch().then((results) => {
                 message.channel.bulkDelete(results);
             });
         }
     });
-    Command(client, 'status', function (message) {
-        const content = message.content.replace('!status', '');
-        client.user?.setPresence({ activity: { name: content, type: 0 } });
+    //  '!status' => Change Status of this Bot
+    command_1.default(client, 'status', (message) => {
+        client.user?.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
     });
-    DirectMessage(client, 'ping', 'pong');
-    Command(client, 'dm', function (message) {
-        client.users.fetch(message.author.id).then((user) => { user.send('Hello World.'); });
+    // channelId, text, reactions => Edit First Message of Channel
+    // firstMessage(client, '805560753657479231', 'Hello World!!!!', [':x:', ':o:']);
+    // '!ping' => 'Pong!'
+    private_message_1.default(client, 'ping', 'Pong!');
+    // '!createtextchannel' => Create Text Channel to Category
+    command_1.default(client, 'createtextchannel', (message) => {
+        const name = message.content.replace('!createtextchannel ', '');
+        message.guild?.channels.create(name, { type: 'text', }).then((channel) => {
+            const categoryId = '807957746572984340';
+            channel.setParent(categoryId);
+        });
     });
-    Command(client, 'embed', (message) => {
+    // '!createvoicechannel' => Create Voice Channel to Category
+    command_1.default(client, 'createvoicechannel', (message) => {
+        const name = message.content.replace('!createvoicechannel ', '');
+        message.guild?.channels.create(name, { type: 'voice', }).then((channel) => {
+            const categoryId = '807957746572984340';
+            channel.setParent(categoryId);
+            channel.setUserLimit(10);
+        });
+    });
+    // '!embed' => Create Embed Message
+    command_1.default(client, 'embed', (message) => {
         const logo = 'https://avatars.githubusercontent.com/u/43507417';
-        const embed = new discord_js_1.default.MessageEmbed()
+        const embed = new Discord.MessageEmbed()
             .setTitle('TITLE')
             .setURL('https://github.com/otkrickey/TwitchClipEditor')
             .setAuthor('otkrickey')
@@ -85,18 +67,26 @@ client.on('ready', function () {
             .setFooter('This is a footer');
         message.channel.send(embed);
     });
-    Command(client, 'server', (message) => {
+    command_1.default(client, 'serverinfo', function (message) {
         const { guild } = message;
-        if (guild) {
-            const { name, region, memberCount, owner } = guild;
-            const icon = guild?.iconURL();
-            const embed = new discord_js_1.default.MessageEmbed()
-                .setTitle(name)
-                .setThumbnail(icon)
-                .addFields({ name: 'Region', value: region, inline: true, }, { name: 'Members', value: memberCount, inline: true, }, { name: 'Owner', value: owner?.user.tag, });
-            message.channel.send(embed);
-        }
+        const { name, region, memberCount, owner } = guild;
+        const icon = guild?.iconURL();
+        const embed = new Discord.MessageEmbed()
+            .setTitle(name)
+            .setThumbnail(icon)
+            .addFields({ name: 'Region', value: region, inline: true, }, { name: 'Members', value: memberCount, inline: true, }, { name: 'Owner', value: owner?.user.tag, });
+        message.channel.send(embed);
     });
+    command_1.default(client, 'help', (message) => {
+        message.channel.send(`
+いずれ書くから待ってて～
+These are my supported commands:
+**!help** - Displays the help menu
+**!add <num1> <num2>** - Adds two numbers
+**!sub <num1> <num2>** - Subtracts two numbers
+`);
+    });
+    client.user?.setPresence({ activity: { name: `"${process.env.prefix}help" for help`, }, });
 });
-client.login(token);
+client.login(process.env.TOKEN);
 //# sourceMappingURL=index.js.map
