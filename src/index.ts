@@ -92,7 +92,21 @@ client.on('ready', async function () {
                 { name: 'Owner', value: owner?.user.tag, }
             );
         message.channel.send(embed);
-    })
+    });
+
+
+    command(client, 'help', (message) => {
+        message.channel.send(`
+いずれ書くから待ってて～
+These are my supported commands:
+**!help** - Displays the help menu
+**!add <num1> <num2>** - Adds two numbers
+**!sub <num1> <num2>** - Subtracts two numbers
+`)
+    });
+
+
+    client.user?.setPresence({ activity: { name: `"${process.env.prefix}help" for help`, }, });
 });
 
 client.login(process.env.TOKEN);
