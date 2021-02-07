@@ -1,69 +1,28 @@
-import Discord from 'discord.js';
+import Discord = require('discord.js');
+require('dotenv').config();
 const client = new Discord.Client();
 
-require('dotenv').config();
-const token = process.env.TOKEN;
-const prefix = process.env.PREFIX;
-const channel = process.env.CHANNEL;
+import command from './command';
+import firstMessage from './first-message';
+import privateMessage from './private-message';
 
-import emoji from 'node-emoji';
+client.on('ready', async function () {
+    console.log('The client is ready!');
 
-function EMOJI(text: string | undefined): string | undefined { const _c = text ? emoji.find(text) : undefined; return _c ? _c.emoji : undefined; }
-
-function Command(client: Discord.Client, aliases: string | string[], callback: (message: Discord.Message) => void): void {
-    client.on('message', function (message) {
-        const { content } = message;
-        for (const alias of (typeof aliases === 'string') ? [aliases] : aliases) {
-            const command = `${prefix}${alias}`;
-            if (content.startsWith(`${command} `) || content === command) {
-                console.log(`Running ${command}`);
-                callback(message);
-            }
-        }
-    });
-}
-
-function AddReactions(message: Discord.Message, reactions: string[]): void {
-    const reaction = EMOJI(reactions.shift());
-    if (reaction) { message.react(reaction); }
-    if (reactions.length > 0) {
-        return AddReactions(message, reactions);
-    }
-}
-
-async function StartVoting(client: Discord.Client, id: string | undefined, text: string, reactions: string[] = []): Promise<void> {
-    if (id) {
-        const _channel = await client.channels.fetch(id);
-        const channel = (_channel as Discord.TextChannel);
-        channel.send(`[vote] "${text}"`).then(message => { AddReactions(message, reactions); });
-    }
-}
-
-
-function DirectMessage(client: Discord.Client, req: string, res: string): void {
-    client.on('message', function (message) {
-        if (message.channel.type === 'dm' && message.content.toLowerCase() === req.toLowerCase()) {
-            message.author.send(res);
-        }
-    });
-}
-
-
-client.on('ready', function () {
-    console.log('The Client is ready');
-
-    Command(client, 'vote', function (message) {
-        const content = message.content.replace('!vote ', '');
-        const Emojis = ['o', 'x'];
-        message.delete();
-        StartVoting(client, channel, content, Emojis);
+    // '!ping' | '!test' => 'Pong!'
+    command(client, ['ping', 'test'], (message) => {
+        message.channel.send('Pong!')
     });
 
-    Command(client, ['ping'], function (message) {
-        message.channel.send('Pong!');
+    // '!servers' => Count of Server Members
+    command(client, 'servers', (message) => {
+        client.guilds.cache.forEach((guild) => {
+            message.channel.send(`${guild.name} has a total of ${guild.memberCount} members`);
+        });
     });
 
-    Command(client, ['cc', 'clearChannel'], function (message) {
+    // '!cc' | 'clearchannel' => Clear All messages from channel
+    command(client, ['cc', 'clearchannel'], (message) => {
         if (message.member?.hasPermission('ADMINISTRATOR')) {
             message.channel.messages.fetch().then((results) => {
                 (message.channel as Discord.TextChannel | Discord.NewsChannel).bulkDelete(results);
@@ -71,18 +30,38 @@ client.on('ready', function () {
         }
     });
 
-    Command(client, 'status', function (message) {
-        const content = message.content.replace('!status', '');
-        client.user?.setPresence({ activity: { name: content, type: 0 } });
+    //  '!status' => Change Status of this Bot
+    command(client, 'status', (message) => {
+        client.user?.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
     });
 
-    DirectMessage(client, 'ping', 'pong');
+    // channelId, text, reactions => Edit First Message of Channel
+    // firstMessage(client, '805560753657479231', 'Hello World!!!!', [':x:', ':o:']);
 
-    Command(client, 'dm', function (message) {
-        client.users.fetch(message.author.id).then((user) => { user.send('Hello World.'); });
+    // '!ping' => 'Pong!'
+    privateMessage(client, 'ping', 'Pong!');
+
+    // '!createtextchannel' => Create Text Channel to Category
+    command(client, 'createtextchannel', (message) => {
+        const name = message.content.replace('!createtextchannel ', '');
+        message.guild?.channels.create(name, { type: 'text', }).then((channel) => {
+            const categoryId = '807957746572984340';
+            channel.setParent(categoryId);
+        });
+    })
+
+    // '!createvoicechannel' => Create Voice Channel to Category
+    command(client, 'createvoicechannel', (message) => {
+        const name = message.content.replace('!createvoicechannel ', '');
+        message.guild?.channels.create(name, { type: 'voice', }).then((channel) => {
+            const categoryId = '807957746572984340';
+            channel.setParent(categoryId);
+            channel.setUserLimit(10);
+        });
     });
 
-    Command(client, 'embed', (message) => {
+    // '!embed' => Create Embed Message
+    command(client, 'embed', (message) => {
         const logo = 'https://avatars.githubusercontent.com/u/43507417';
         const embed = new Discord.MessageEmbed()
             .setTitle('TITLE')
@@ -99,24 +78,6 @@ client.on('ready', function () {
             .setFooter('This is a footer');
         message.channel.send(embed);
     });
-
-    Command(client, 'server', (message) => {
-        const { guild } = message;
-        if (guild) {
-            const { name, region, memberCount, owner } = guild;
-            const icon = guild?.iconURL();
-            const embed = new Discord.MessageEmbed()
-                .setTitle(name)
-                .setThumbnail(icon as string)
-                .addFields(
-                    { name: 'Region', value: region, inline: true, },
-                    { name: 'Members', value: memberCount, inline: true, },
-                    { name: 'Owner', value: owner?.user.tag, }
-                );
-
-            message.channel.send(embed);
-        }
-    });
 });
 
-client.login(token);
+client.login(process.env.TOKEN);
