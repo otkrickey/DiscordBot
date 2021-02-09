@@ -5,6 +5,7 @@ const client = new Discord.Client();
 import command from './command';
 import firstMessage from './first-message';
 import privateMessage from './private-message';
+import roleClaim from './role-claim';
 
 client.on('ready', async function () {
     console.log('The client is ready!');
@@ -94,6 +95,7 @@ client.on('ready', async function () {
         message.channel.send(embed);
     });
 
+    roleClaim(client);
 
     command(client, 'help', (message) => {
         message.channel.send(`
@@ -104,6 +106,7 @@ These are my supported commands:
 **!sub <num1> <num2>** - Subtracts two numbers
 `)
     });
+
 
 
     client.user?.setPresence({ activity: { name: `"${process.env.prefix}help" for help`, }, });
