@@ -86,12 +86,12 @@ client.on('ready', async function () {
         const icon = guild?.iconURL();
         const embed = new Discord.MessageEmbed()
             .setTitle(name)
-            .setThumbnail(icon as string)
             .addFields(
                 { name: 'Region', value: region, inline: true, },
                 { name: 'Members', value: memberCount, inline: true, },
                 { name: 'Owner', value: owner?.user.tag, }
             );
+        if (icon) { embed.setThumbnail(icon); }
         message.channel.send(embed);
     });
 
