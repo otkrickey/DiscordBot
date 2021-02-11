@@ -6,6 +6,7 @@ import command from './command';
 import firstMessage from './first-message';
 import privateMessage from './private-message';
 import roleClaim from './role-claim';
+import vote from './vote';
 
 
 client.setMaxListeners(0)
@@ -155,6 +156,11 @@ client.on('ready', async function () {
         } else {
             message.channel.send(`${tag} You do not have permission to use this command.`);
         }
+    });
+
+    command(client, 'vote', function (message) {
+        const text = message.content.replace('!vote ', '');
+        vote(client, process.env.CHANNEL, text, ['+1', '-1']);
     });
 });
 
