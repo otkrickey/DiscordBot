@@ -12,6 +12,7 @@ client.setMaxListeners(0)
 
 client.on('ready', async function () {
     console.log('The client is ready!');
+    client.user?.setPresence({ activity: { name: `"${process.env.PREFIX}help" for help`, }, });
     // (client.channels.cache.find(channel => channel.id === process.env.CHANNEL && channel.type === 'text') as Discord.TextChannel).send('Bot Connected').then(message => { setInterval(() => { message.delete() }, 500) })
 
     // '!ping' | '!test' => 'Pong!'
@@ -116,12 +117,45 @@ client.on('ready', async function () {
         message.channel.send(`いずれ書くから待ってて～`)
     });
 
-    command(client, 'asd', function (message) {
-        const asd = message.guild?.roles.cache.map(role => role.name);
-        console.log(asd);
-    })
+    command(client, 'ban', (message) => {
+        const { member, guild, mentions } = message;
+        if (!member) { throw console.error(`[src/index.ts] Error $member ${member}`); }
+        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
 
-    client.user?.setPresence({ activity: { name: `"${process.env.PREFIX}help" for help`, }, });
+        const tag = `<@${member.id}>`;
+
+        if (member.hasPermission('ADMINISTRATOR') || member.hasPermission('BAN_MEMBERS')) {
+            const target = mentions.users.first();
+            if (target) {
+                const targetMember = guild.members.cache.get(target.id)?.ban();
+                message.channel.send(`${tag} That user has been`);
+            } else {
+                message.channel.send(`${tag} Please specify someone to ban.`);
+            }
+        } else {
+            message.channel.send(`${tag} You do not have permission to use this command.`);
+        }
+    });
+
+    command(client, 'kick', (message) => {
+        const { member, guild, mentions } = message;
+        if (!member) { throw console.error(`[src/index.ts] Error $member ${member}`); }
+        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+
+        const tag = `<@${member.id}>`;
+
+        if (member.hasPermission('ADMINISTRATOR') || member.hasPermission('KICK_MEMBERS')) {
+            const target = mentions.users.first();
+            if (target) {
+                const targetMember = guild.members.cache.get(target.id)?.kick();
+                message.channel.send(`${tag} That user has kicked`);
+            } else {
+                message.channel.send(`${tag} Please specify someone to kick.`);
+            }
+        } else {
+            message.channel.send(`${tag} You do not have permission to use this command.`);
+        }
+    });
 });
 
 client.login(process.env.TOKEN);
