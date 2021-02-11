@@ -45,10 +45,6 @@ export default (client: Discord.Client, emojis: { [key: string]: string }) => {
         }
     }
 
-    client.on('messageReactionAdd', (reaction, user) => {
-        if (reaction.message.channel.id === channelId) { handleReaction(reaction, user, true); }
-    });
-    client.on('messageReactionRemove', (reaction, user) => {
-        if (reaction.message.channel.id === channelId) { handleReaction(reaction, user, false); }
-    });
+    client.on('messageReactionAdd', (reaction, user) => { if (reaction.message.channel.id === channelId && emoji.find(reaction.emoji.name)['key'] in emojis) { handleReaction(reaction, user, true); } });
+    client.on('messageReactionRemove', (reaction, user) => { if (reaction.message.channel.id === channelId && emoji.find(reaction.emoji.name)['key'] in emojis) { handleReaction(reaction, user, false); } });
 }
