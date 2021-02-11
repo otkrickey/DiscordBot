@@ -7,6 +7,7 @@ import firstMessage from './first-message';
 import privateMessage from './private-message';
 import roleClaim from './role-claim';
 import vote from './vote';
+import welcome from './welcome';
 
 
 client.setMaxListeners(0)
@@ -162,6 +163,8 @@ client.on('ready', async function () {
         const text = message.content.replace('!vote ', '');
         vote(client, process.env.CHANNEL, text, ['+1', '-1']);
     });
+
+    welcome(client);
 });
 
 client.login(process.env.TOKEN);
