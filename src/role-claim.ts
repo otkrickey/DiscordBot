@@ -6,12 +6,14 @@ import firstMessage from './first-message';
 
 export default (client: Discord.Client, emojis: { [key: string]: string }) => {
     const channelId = process.env.CHANNEL;
+    if (!channelId) { throw console.error(`[src/role-claim.ts] Error $channelId ${channelId}`); }
+
     let emojiText = 'Add a reaction to claim a role\n\n';
     const reactions: string[] = [];
     for (const key in emojis) {
         reactions.push(key);
         const role = emojis[key];
-        emojiText += `${emoji.get(key)} : <@&${client.guilds.cache.find(guild => guild.channels.cache.find(channel => channel.id === channelId) ? true : false)?.roles.cache.find(_role => _role.name === role)?.id}> \n`;
+        emojiText += `${emoji.get(key)} : <@&${client.guilds.cache.find(guild => guild.channels.cache.get(channelId) ? true : false)?.roles.cache.find(_role => _role.name === role)?.id}> \n`;
     }
     emojiText += `\nロールが変更されない場合は、再度お試しください。`
 
@@ -30,7 +32,7 @@ export default (client: Discord.Client, emojis: { [key: string]: string }) => {
         const role = guild.roles.cache.find(role => role.name === roleName);
         if (!role) { throw console.error(`[src/role-claim.ts] Error $role ${role}`); }
 
-        const member = guild.members.cache.find(member => member.id === user.id);
+        const member = guild.members.cache.get(user.id);
         if (!member) { return }
 
         if (add) {
