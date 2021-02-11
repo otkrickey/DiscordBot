@@ -2,16 +2,8 @@ import Discord = require('discord.js');
 import emoji = require('node-emoji');
 require('dotenv').config();
 
-function addReactions(message: Discord.Message, reactions: string[]): void {
-    const reaction = reactions.shift();
-    if (reaction) {
-        const Emoji = emoji.get(reaction);
-        message.react(Emoji);
-    }
-    if (reactions.length) {
-        return addReactions(message, reactions);
-    }
-}
+import addReactions from './add-reaction';
+
 
 export default async (client: Discord.Client, channelId: string | undefined, text: string | undefined, reactions: string[] = []): Promise<void> => {
     if (!channelId) { throw console.error(`[src/first-message.ts] Error $id ${channelId}`); }
