@@ -7,8 +7,12 @@ import firstMessage from './first-message';
 import privateMessage from './private-message';
 import roleClaim from './role-claim';
 
+
+client.setMaxListeners(0)
+
 client.on('ready', async function () {
     console.log('The client is ready!');
+    // (client.channels.cache.find(channel => channel.id === process.env.CHANNEL && channel.type === 'text') as Discord.TextChannel).send('Bot Connected').then(message => { setInterval(() => { message.delete() }, 500) })
 
     // '!ping' | '!test' => 'Pong!'
     command(client, ['ping', 'test'], (message) => {
@@ -24,28 +28,34 @@ client.on('ready', async function () {
 
     // '!cc' | 'clearchannel' => Clear All messages from channel
     command(client, ['cc', 'clearchannel'], (message) => {
-        if (message.member?.hasPermission('ADMINISTRATOR')) {
-            message.channel.messages.fetch().then((results) => {
-                (message.channel as Discord.TextChannel | Discord.NewsChannel).bulkDelete(results);
-            });
-        }
+        if (!message.member) { throw console.error(`[src/index.ts] Error $message.member ${message.member}`); }
+        if (!message.member.hasPermission('ADMINISTRATOR')) { throw console.error(`[src/index.ts] Error $message.member.hasPermission('ADMINISTRATOR') ${message.member.hasPermission('ADMINISTRATOR')}`); }
+        message.channel.messages.fetch().then(results => {
+            if (message.channel instanceof (Discord.TextChannel || Discord.NewsChannel)) {
+                message.channel.bulkDelete(results);
+            }
+        });
     });
 
-    //  '!status' => Change Status of this Bot
+    // '!status' => Change Status of this Bot
     command(client, 'status', (message) => {
-        client.user?.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
+        if (!client.user) { throw console.error(`[src/index.ts] Error $client.user ${client.user}`); }
+        client.user.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
     });
 
     // channelId, text, reactions => Edit First Message of Channel
-    // firstMessage(client, '805560753657479231', 'Hello World!!!!', [':x:', ':o:']);
+    // firstMessage(client, 'process.env.CHANNEL', 'Hello World!!!!', [':x:', ':o:']);
 
     // '!ping' => 'Pong!'
     privateMessage(client, 'ping', 'Pong!');
 
     // '!createtextchannel' => Create Text Channel to Category
     command(client, 'createtextchannel', (message) => {
+        const { guild } = message;
+        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+
         const name = message.content.replace('!createtextchannel ', '');
-        message.guild?.channels.create(name, { type: 'text', }).then((channel) => {
+        guild.channels.create(name, { type: 'text', }).then((channel) => {
             const categoryId = '807957746572984340';
             channel.setParent(categoryId);
         });
@@ -53,8 +63,11 @@ client.on('ready', async function () {
 
     // '!createvoicechannel' => Create Voice Channel to Category
     command(client, 'createvoicechannel', (message) => {
+        const { guild } = message;
+        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+
         const name = message.content.replace('!createvoicechannel ', '');
-        message.guild?.channels.create(name, { type: 'voice', }).then((channel) => {
+        guild.channels.create(name, { type: 'voice', }).then((channel) => {
             const categoryId = '807957746572984340';
             channel.setParent(categoryId);
             channel.setUserLimit(10);
@@ -82,8 +95,10 @@ client.on('ready', async function () {
 
     command(client, 'serverinfo', function (message) {
         const { guild } = message;
-        const { name, region, memberCount, owner } = guild as Discord.Guild;
-        const icon = guild?.iconURL();
+        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+
+        const { name, region, memberCount, owner } = guild;
+        const icon = guild.iconURL();
         const embed = new Discord.MessageEmbed()
             .setTitle(name)
             .addFields(
@@ -95,21 +110,18 @@ client.on('ready', async function () {
         message.channel.send(embed);
     });
 
-    roleClaim(client);
+    roleClaim(client, { o: 'Yes', x: 'No' });
 
     command(client, 'help', (message) => {
-        message.channel.send(`
-いずれ書くから待ってて～
-These are my supported commands:
-**!help** - Displays the help menu
-**!add <num1> <num2>** - Adds two numbers
-**!sub <num1> <num2>** - Subtracts two numbers
-`)
+        message.channel.send(`いずれ書くから待ってて～`)
     });
 
+    command(client, 'asd', function (message) {
+        const asd = message.guild?.roles.cache.map(role => role.name);
+        console.log(asd);
+    })
 
-
-    client.user?.setPresence({ activity: { name: `"${process.env.prefix}help" for help`, }, });
+    client.user?.setPresence({ activity: { name: `"${process.env.PREFIX}help" for help`, }, });
 });
 
 client.login(process.env.TOKEN);
