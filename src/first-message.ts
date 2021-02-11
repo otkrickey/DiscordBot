@@ -1,6 +1,5 @@
 import Discord = require('discord.js');
 import emoji = require('node-emoji');
-import { type } from 'os';
 require('dotenv').config();
 
 function addReactions(message: Discord.Message, reactions: string[]): void {
