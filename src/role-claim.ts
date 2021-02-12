@@ -6,7 +6,7 @@ import firstMessage from './first-message';
 
 export default (client: Discord.Client, emojis: { [key: string]: string }) => {
     const channelId = process.env.CHANNEL;
-    if (!channelId) { throw console.error(`[src/role-claim.ts] Error $channelId ${channelId}`); }
+    if (!channelId) { return }
 
     let emojiText = 'Add a reaction to claim a role\n\n';
     const reactions: string[] = [];
@@ -21,16 +21,15 @@ export default (client: Discord.Client, emojis: { [key: string]: string }) => {
 
     const handleReaction = (reaction: Discord.MessageReaction, user: Discord.User | Discord.PartialUser, add: boolean): void => {
         if (user.id === client.user?.id) { return }
-        // if (user.id !== process.env.OWNER) { throw console.error(`[src/role-claim.ts] Error $user.id ${user.id}`); }
 
         const { guild } = reaction.message;
-        if (!guild) { throw console.error(`[src/role-claim.ts] Error $guild ${guild}`); }
+        if (!guild) { return }
 
         const roleName = emojis[emoji.find(reaction.emoji.name)['key']];
-        if (!roleName) { throw console.error(`[src/role-claim.ts] Error $roleName ${roleName}`); }
+        if (!roleName) { return }
 
         const role = guild.roles.cache.find(role => role.name === roleName);
-        if (!role) { throw console.error(`[src/role-claim.ts] Error $role ${role}`); }
+        if (!role) { return }
 
         const member = guild.members.cache.get(user.id);
         if (!member) { return }

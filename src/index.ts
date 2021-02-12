@@ -8,6 +8,7 @@ import privateMessage from './private-message';
 import roleClaim from './role-claim';
 import vote from './vote';
 import welcome from './welcome';
+import memberCount from './member-count';
 
 
 client.setMaxListeners(0)
@@ -31,8 +32,8 @@ client.on('ready', async function () {
 
     // '!cc' | 'clearchannel' => Clear All messages from channel
     command(client, ['cc', 'clearchannel'], (message) => {
-        if (!message.member) { throw console.error(`[src/index.ts] Error $message.member ${message.member}`); }
-        if (!message.member.hasPermission('ADMINISTRATOR')) { throw console.error(`[src/index.ts] Error $message.member.hasPermission('ADMINISTRATOR') ${message.member.hasPermission('ADMINISTRATOR')}`); }
+        if (!message.member) { return }
+        if (!message.member.hasPermission('ADMINISTRATOR')) { return }
         message.channel.messages.fetch().then(results => {
             if (message.channel instanceof (Discord.TextChannel || Discord.NewsChannel)) {
                 message.channel.bulkDelete(results);
@@ -42,7 +43,7 @@ client.on('ready', async function () {
 
     // '!status' => Change Status of this Bot
     command(client, 'status', (message) => {
-        if (!client.user) { throw console.error(`[src/index.ts] Error $client.user ${client.user}`); }
+        if (!client.user) { return }
         client.user.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
     });
 
@@ -55,7 +56,7 @@ client.on('ready', async function () {
     // '!createtextchannel' => Create Text Channel to Category
     command(client, 'createtextchannel', (message) => {
         const { guild } = message;
-        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+        if (!guild) { return }
 
         const name = message.content.replace('!createtextchannel ', '');
         guild.channels.create(name, { type: 'text', }).then((channel) => {
@@ -67,7 +68,7 @@ client.on('ready', async function () {
     // '!createvoicechannel' => Create Voice Channel to Category
     command(client, 'createvoicechannel', (message) => {
         const { guild } = message;
-        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+        if (!guild) { return }
 
         const name = message.content.replace('!createvoicechannel ', '');
         guild.channels.create(name, { type: 'voice', }).then((channel) => {
@@ -98,7 +99,7 @@ client.on('ready', async function () {
 
     command(client, 'serverinfo', function (message) {
         const { guild } = message;
-        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+        if (!guild) { return }
 
         const { name, region, memberCount, owner } = guild;
         const icon = guild.iconURL();
@@ -116,13 +117,13 @@ client.on('ready', async function () {
     roleClaim(client, { o: 'Yes', x: 'No' });
 
     command(client, 'help', (message) => {
-        message.channel.send(`いずれ書くから待ってて～`)
+        message.channel.send(`いずれ書くから待ってて～`);
     });
 
     command(client, 'ban', (message) => {
         const { member, guild, mentions } = message;
-        if (!member) { throw console.error(`[src/index.ts] Error $member ${member}`); }
-        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+        if (!member) { return }
+        if (!guild) { return }
 
         const tag = `<@${member.id}>`;
 
@@ -141,8 +142,8 @@ client.on('ready', async function () {
 
     command(client, 'kick', (message) => {
         const { member, guild, mentions } = message;
-        if (!member) { throw console.error(`[src/index.ts] Error $member ${member}`); }
-        if (!guild) { throw console.error(`[src/index.ts] Error $guild ${guild}`); }
+        if (!member) { return }
+        if (!guild) { return }
 
         const tag = `<@${member.id}>`;
 
@@ -165,6 +166,10 @@ client.on('ready', async function () {
     });
 
     welcome(client);
+
+    // memberCount(client, process.env.VARIABLE_CHANNEL_1, process.env.GUILD);
+
+    
 });
 
 client.login(process.env.TOKEN);

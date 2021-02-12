@@ -5,16 +5,16 @@ import emoji = require('node-emoji');
 
 export default (client: Discord.Client) => {
     const channelId = process.env.CHANNEL;
-    if (!channelId) { throw console.error(`[src/welcome.ts] Error $channelId ${channelId}`); }
+    if (!channelId) { return }
     const targetChannelId = process.env.CHANNEL;
-    if (!targetChannelId) { throw console.error(`[src/welcome.ts] Error $targetChannelId ${targetChannelId}`); }
+    if (!targetChannelId) { return }
 
     client.on('guildMemberAdd', (member) => {
         const message = `Please welcome <@${member.id}> to the server! Please check out ${member.guild.channels.cache.get(targetChannelId)?.toString()}`;
 
         const channel = member.guild.channels.cache.get(channelId);
-        if (!channel) { throw console.error(`[src/welcome.ts] Error $channel ${channel}`); }
-        if (!(channel instanceof Discord.TextChannel)) { throw console.error(`[src/welcome.ts] Error $channel ${typeof channel}`); }
+        if (!channel) { return }
+        if (!(channel instanceof Discord.TextChannel)) { return }
 
         channel.send(message);
     });
