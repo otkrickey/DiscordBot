@@ -45,7 +45,7 @@ function connectDiscord() {
 
     client.on('message', message => {
         // 自分のメッセージには反応しない
-        // if (message.author.id == ) { return; }
+        if (message.author.id == '806520169606152243') { return; }
         msg = message;
 
         // botへのリプライ応対
