@@ -1,92 +1,139 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const Discord = require("discord.js");
-require('dotenv').config();
-const client = new Discord.Client();
-const command_1 = __importDefault(require("./command"));
-const private_message_1 = __importDefault(require("./private-message"));
-client.on('ready', async function () {
-    console.log('The client is ready!');
-    // '!ping' | '!test' => 'Pong!'
-    command_1.default(client, ['ping', 'test'], (message) => {
-        message.channel.send('Pong!');
+const DC = this;
+
+// msgの一時退避
+var msg;
+
+var discord = require('discord.js');
+var client = null;
+
+// Response for Uptime Robot
+const http = require('http');
+http.createServer(function (request, response) {
+    connectDiscord();
+    response.end('Discord bot is active now.');
+}).listen(3000);
+
+function connectDiscord() {
+    console.log('00');
+
+    // 状態によって処理変更する。
+    if (client == null) {
+        client = new discord.Client();
+    } else {
+        if (client.readyAt != null) {
+            switch (client.status) {
+                case 0: // READY
+                case 1: // CONNECTING
+                case 2: // RECONNECTING
+                case 3: // IDLE
+                case 4: // NEARLY
+                    return;
+                case 5: // DISCONNECTED
+                    client.destroy();
+                    break;
+                default:
+                    client = new discord.Client();
+                    break;
+            }
+        }
+    }
+
+    client.login(process.env.DISCORD_BOT_TOKEN);
+    client.on('ready', message => {
+        console.log('bot is ready!');
     });
-    // '!servers' => Count of Server Members
-    command_1.default(client, 'servers', (message) => {
-        client.guilds.cache.forEach((guild) => {
-            message.channel.send(`${guild.name} has a total of ${guild.memberCount} members`);
-        });
-    });
-    // '!cc' | 'clearchannel' => Clear All messages from channel
-    command_1.default(client, ['cc', 'clearchannel'], (message) => {
-        if (message.member?.hasPermission('ADMINISTRATOR')) {
-            message.channel.messages.fetch().then((results) => {
-                message.channel.bulkDelete(results);
-            });
+
+    client.on('message', message => {
+        // 自分のメッセージには反応しない
+        // if (message.author.id == ) { return; }
+        msg = message;
+
+        // botへのリプライ応対
+        if (msg.isMemberMentioned(client.user)) {
+            if (msg.content.indexOf('content') > 0) {
+                msg.reply(msg.content);
+                console.log(msg.content);
+                return;
+            }
+            if (msg.content.indexOf('logout') > 0) {
+                msg.reply('ログアウトします。');
+                client.destroy();
+                return;
+            }
+            if (msg.content.indexOf('status') > 0) {
+                msg.reply(client.status);
+                return;
+            }
+            if (msg.content.indexOf('help') > 0) {
+                msg.reply('ヘルプメッセージ');
+                return;
+            }
+            sendGAS(msg);
+            return;
+        }
+
+        // botへのリプライじゃなかった場合
+        else {
+            // []でくくったコマンドに応対する。
+            if (msg.content.match(/^\[(?=.*\])/i)) {
+                sendGAS(msg);
+                return;
+            }
         }
     });
-    //  '!status' => Change Status of this Bot
-    command_1.default(client, 'status', (message) => {
-        client.user?.setPresence(message.content === '!status' ? {} : { activity: { name: message.content, type: 'PLAYING', }, });
+
+    if (process.env.DISCORD_BOT_TOKEN == undefined) {
+        console.log('please set ENV: DISCORD_BOT_TOKEN');
+        process.exit(0);
+    }
+}
+
+// send
+var sendGAS = function (msg) {
+    var params = msg.content.split(' ');
+    var userId = params[0];
+    var value = null;
+    for (var n = 1; n < params.length; n++) {
+        if (n == 1)
+            value = params[n];
+        else
+            value = value + ' ' + params[n];
+    }
+
+    var jsonData = {
+        'userId': msg.member.id,
+        'value': value,
+        'message': msg.content,
+        'channelId': msg.channel.id,
+    }
+
+    post(process.env.GAS_URI, jsonData)
+}
+
+// post
+var post = function (uri, jsonData) {
+    var request = require('request');
+    var options = {
+        uri: uri,
+        headers: { "Content-type": "application/json" },
+        json: jsonData,
+        followAllRedirects: true,
+    }
+
+    request.post(options, function (error, response, body) {
+        if (error != null) {
+            msg.reply('更新に失敗しました');
+            return;
+        }
+
+        var userid = response.body.userid;
+        var channelid = response.body.channelid;
+        var message = response.body.message;
+        if (userid != undefined && channelid != undefined && message != undefined) {
+            var channel = client.channels.get(channelid);
+            if (channel != null) {
+                channel.send(message);
+            }
+        }
     });
-    // channelId, text, reactions => Edit First Message of Channel
-    // firstMessage(client, '805560753657479231', 'Hello World!!!!', [':x:', ':o:']);
-    // '!ping' => 'Pong!'
-    private_message_1.default(client, 'ping', 'Pong!');
-    // '!createtextchannel' => Create Text Channel to Category
-    command_1.default(client, 'createtextchannel', (message) => {
-        const name = message.content.replace('!createtextchannel ', '');
-        message.guild?.channels.create(name, { type: 'text', }).then((channel) => {
-            const categoryId = '807957746572984340';
-            channel.setParent(categoryId);
-        });
-    });
-    // '!createvoicechannel' => Create Voice Channel to Category
-    command_1.default(client, 'createvoicechannel', (message) => {
-        const name = message.content.replace('!createvoicechannel ', '');
-        message.guild?.channels.create(name, { type: 'voice', }).then((channel) => {
-            const categoryId = '807957746572984340';
-            channel.setParent(categoryId);
-            channel.setUserLimit(10);
-        });
-    });
-    // '!embed' => Create Embed Message
-    command_1.default(client, 'embed', (message) => {
-        const logo = 'https://avatars.githubusercontent.com/u/43507417';
-        const embed = new Discord.MessageEmbed()
-            .setTitle('TITLE')
-            .setURL('https://github.com/otkrickey/TwitchClipEditor')
-            .setAuthor('otkrickey')
-            .setImage(logo)
-            .setThumbnail(logo)
-            .setColor('#00AAFF')
-            .addFields({ name: 'FIeld 1', value: 'Hello world', inline: true, }, { name: 'Field 2', value: 'Hello world', inline: true, }, { name: 'Field 3', value: 'Hello world', inline: true, })
-            .setFooter('This is a footer');
-        message.channel.send(embed);
-    });
-    command_1.default(client, 'serverinfo', function (message) {
-        const { guild } = message;
-        const { name, region, memberCount, owner } = guild;
-        const icon = guild?.iconURL();
-        const embed = new Discord.MessageEmbed()
-            .setTitle(name)
-            .setThumbnail(icon)
-            .addFields({ name: 'Region', value: region, inline: true, }, { name: 'Members', value: memberCount, inline: true, }, { name: 'Owner', value: owner?.user.tag, });
-        message.channel.send(embed);
-    });
-    command_1.default(client, 'help', (message) => {
-        message.channel.send(`
-いずれ書くから待ってて～
-These are my supported commands:
-**!help** - Displays the help menu
-**!add <num1> <num2>** - Adds two numbers
-**!sub <num1> <num2>** - Subtracts two numbers
-`);
-    });
-    client.user?.setPresence({ activity: { name: `"${process.env.prefix}help" for help`, }, });
-});
-client.login(process.env.TOKEN);
-//# sourceMappingURL=index.js.map
+}
