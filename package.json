@@ -7,13 +7,14 @@
     "dev": "ts-node src/index.ts",
     "dev:idea": "ts-node src/idea.ts",
     "dev:watch": "ts-node-dev src/index.ts",
-    "dev:watch:idea": "ts-node-dev src/idea.ts",
     "test": "ts-node-dev src/test.ig.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/mongodb": "^3.6.7",
+    "@types/mongoose": "^5.10.3",
     "@types/node": "^14.14.25",
     "@types/node-emoji": "^1.8.1",
     "ts-node": "^9.1.1",
@@ -23,6 +24,7 @@
   "dependencies": {
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
+    "mongoose": "^5.11.16",
     "node-emoji": "^1.10.0"
   }
 }
