@@ -12,7 +12,8 @@ const channelId = process.env.CHANNEL;
 const port = process.env.PORT;
 const server = http_1.default.createServer(handler);
 const BOT_STATUS = () => {
-    return client.user?.presence.status;
+    var _a;
+    return (_a = client.user) === null || _a === void 0 ? void 0 : _a.presence.status;
 };
 function handler(req, res) {
     if (req.method === 'GET') {
@@ -23,7 +24,8 @@ function handler(req, res) {
     }
 }
 function handleGet(req, res) {
-    const status = BOT_STATUS() ?? 'disconnected';
+    var _a;
+    const status = (_a = BOT_STATUS()) !== null && _a !== void 0 ? _a : 'disconnected';
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
     console.log(`sending status ${status}`);
     return res.end(`{"BOT_STATUS": "${status}"}`);
