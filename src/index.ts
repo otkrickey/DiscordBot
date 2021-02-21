@@ -30,7 +30,7 @@ client.on('ready', function () {
     command({
         client: client,
         commands: ['!cc'],
-        args: 1,
+        args: 2,
         permissions: ['MANAGE_MESSAGES'],
         allowDMChannel: true,
         callback: (message, args, sentence, client): void => {
