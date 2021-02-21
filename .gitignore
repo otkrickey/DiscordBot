@@ -110,3 +110,4 @@ config.json
 
 *.ig.*
 .vscode/
+.src/
