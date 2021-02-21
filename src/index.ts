@@ -16,7 +16,7 @@ client.on('ready', function () {
 
     // greeting
     command({
-        client: client,
+        client,
         commands: ['hi!'],
         args: 0,
         permissions: ['SEND_MESSAGES'],
@@ -28,7 +28,7 @@ client.on('ready', function () {
 
     // clear
     command({
-        client: client,
+        client,
         commands: ['!cc'],
         args: 2,
         permissions: ['MANAGE_MESSAGES'],
@@ -38,18 +38,39 @@ client.on('ready', function () {
             let messageData = message.channel.messages.fetch().then(result => { return result.array(); });
             if (args[1] && args[1] === '-m') {
                 messageData.then(messages => {
+                    messages = messages.filter(msg => messages[1].reactions.cache.array().length === 0)
                     messages = messages.filter(msg => msg.author.id === message.author.id);
                     deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
                 });
-            } else if (args[1] && args[1] !== '-m') {
+            } else if (args[1] && args[1] === '-f') {
+                messageData.then(messages => {
+                    messages = messages.filter(msg => msg.author.id === message.author.id);
+                    deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
+                });
+            } else if (args[1]) {
                 message.reply(`"Error Arg[1]" '-m' expected.`);
             } else {
                 messageData.then(messages => {
+                    messages = messages.filter(msg => messages[1].reactions.cache.array().length === 0)
                     deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
                 });
             }
         }
     });
+
+    // command({
+    //     client,
+    //     commands: ['!c'],
+    //     args: 0,
+    //     permissions: ['MANAGE_MESSAGES'],
+    //     allowDMChannel: false,
+    //     callback: (message, args, sentence, client) => {
+    //         let messageData = message.channel.messages.fetch().then(result => { return result.array(); });
+    //         messageData.then(messages => {
+    //             messages = messages.filter(msg => messages[1].reactions.cache.array().length !== 0)
+    //         })
+    //     }
+    // })
 });
 
 client.login(token);
