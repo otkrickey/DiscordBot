@@ -41,19 +41,19 @@ client.on('ready', function () {
                     messages = messages.filter(msg => msg.reactions.cache.array().length === 0)
                     messages = messages.filter(msg => msg.author.id === message.author.id);
                     deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             } else if (args[1] && args[1] === '-f') {
                 messageData.then(messages => {
                     messages = messages.filter(msg => msg.author.id === message.author.id);
                     deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             } else if (args[1]) {
                 message.reply(`"Error Arg[1]" '-m' expected.`);
             } else {
                 messageData.then(messages => {
                     messages = messages.filter(msg => msg.reactions.cache.array().length === 0)
                     deleteMessage(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             }
         }
     });

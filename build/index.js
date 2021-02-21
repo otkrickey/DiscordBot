@@ -51,13 +51,13 @@ client.on('ready', function () {
                     messages = messages.filter(msg => msg.reactions.cache.array().length === 0);
                     messages = messages.filter(msg => msg.author.id === message.author.id);
                     delete_message_1.default(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             }
             else if (args[1] && args[1] === '-f') {
                 messageData.then(messages => {
                     messages = messages.filter(msg => msg.author.id === message.author.id);
                     delete_message_1.default(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             }
             else if (args[1]) {
                 message.reply(`"Error Arg[1]" '-m' expected.`);
@@ -66,7 +66,7 @@ client.on('ready', function () {
                 messageData.then(messages => {
                     messages = messages.filter(msg => msg.reactions.cache.array().length === 0);
                     delete_message_1.default(messages.slice(0, limit > messages.length ? messages.length : limit));
-                });
+                }).catch(console.error);
             }
         }
     });
