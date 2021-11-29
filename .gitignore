@@ -111,3 +111,5 @@ config.json
 *.ig.*
 .vscode/
 .src/
+
+build/**/*
